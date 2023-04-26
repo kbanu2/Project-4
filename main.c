@@ -294,6 +294,8 @@ StudentNode* createStudent(char* name, char* id, double gpa, int creditHours){
 	return node;
 }
 
+/// @brief Initialize all database lists to null
+/// @param db pointer to database to initialize
 void initializeDB(Database* db){
 	db->pIDList = NULL;
 	db->pHonorRollList = NULL;
