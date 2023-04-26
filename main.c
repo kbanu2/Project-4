@@ -47,7 +47,7 @@ void insertNameInOrder(StudentNode** pHead, StudentNode* student){
 	StudentNode* curr = *pHead;
 
 	while (curr != NULL){
-		if (strcmp(student->pStudent->name, curr->pStudent->name) <= 0){ //Insert before
+		if (strcmp(student->pStudent->name, curr->pStudent->name) < 0){ //Insert before
 			if (prev == NULL){ //Insert before first node
 				student->pNext = (*pHead);
 				(*pHead) = student;
@@ -80,7 +80,7 @@ void insertIDInOrder(StudentNode** pHead, StudentNode* student){
 	StudentNode* curr = *pHead;
 
 	while (curr != NULL){
-		if (strcmp(student->pStudent->id, curr->pStudent->id) <= 0){ //Insert before
+		if (strcmp(student->pStudent->id, curr->pStudent->id) < 0){ //Insert before
 			if (prev == NULL){ //Insert before first node
 				student->pNext = (*pHead);
 				(*pHead) = student;
@@ -114,7 +114,7 @@ void insertGPAInOrder(StudentNode** pHead, StudentNode* student){
 	StudentNode* curr = *pHead;
 
 	while (curr != NULL){
-		if (student->pStudent->gpa <= curr->pStudent->gpa){ //Insert before
+		if (student->pStudent->gpa < curr->pStudent->gpa){ //Insert before
 			if (prev == NULL){ //Insert before first node
 				student->pNext = (*pHead);
 				(*pHead) = student;
@@ -314,25 +314,55 @@ void printDatabase(Database* db){
 	printNameList(db->pFreshmanList);
 }
 
+void displayHeadOfDB(StudentNode* pHead){
+	int i = 0;
+	while (pHead != NULL && i < 10){
+		printf("%s\n", pHead->pStudent->name);
+		printf("\tID - %s\n", pHead->pStudent->id);
+		printf("\tGPA - %lf\n", pHead->pStudent->gpa);
+		printf("\tCredit Hours - %d\n", pHead->pStudent->creditHours);
+
+		pHead = pHead->pNext;
+		i++;
+	}
+}
+
+void displayStudentsInList(StudentNode* pHead){
+	while (pHead != NULL){
+		printf("%s\n", pHead->pStudent->name);
+		printf("\tID - %s\n", pHead->pStudent->id);
+		printf("\tGPA - %lf\n", pHead->pStudent->gpa);
+		printf("\tCredit Hours - %d\n", pHead->pStudent->creditHours);
+
+		pHead = pHead->pNext;
+	}
+}
+
+int loadFile(Database* db, char fileName[81]){
+	
+}
 
 int main() {
 	Database* t = (Database*)malloc(sizeof(Database));
 	initializeDB(t);
+	char userInput[81];
 
 	insertStudent(t, "krenar", "1", 3.5, 100);
 	insertStudent(t, "adam", "100", 1.9, 30);
-	insertStudent(t, "izzy", "2", 3, 70);
+	insertStudent(t, "izzy", "2", 3.5, 70);
 	insertStudent(t, "fiona", "8", 1.2, 120);
 	insertStudent(t, "laine", "0", 4.0, 50);
 
-	printDatabase(t);
-	printf("\n\n");
+	displayHeadOfDB(t->pIDList);
 
-	deleteStudentFromDB(t, "1");
-	deleteStudentFromDB(t, "100");
-	deleteStudentFromDB(t, "2");
-	deleteStudentFromDB(t, "8");
-	deleteStudentFromDB(t, "0");
+	// printDatabase(t);
+	// printf("\n\n");
+
+	// deleteStudentFromDB(t, "1");
+	// deleteStudentFromDB(t, "100");
+	// deleteStudentFromDB(t, "2");
+	// deleteStudentFromDB(t, "8");
+	// deleteStudentFromDB(t, "0");
 
 	// insertStudent(t, "krenar", "1", 3.5, 100);
 	// insertStudent(t, "fiona", "8", 1.2, 120);
@@ -341,19 +371,30 @@ int main() {
 	// deleteStudentFromDB(t, "8");
 	// deleteStudentFromDB(t, "123");
 
-	printDatabase(t);
+	//printDatabase(t);
 
 	free(t);
 
-	// printf("CS 211, Spring 2023\n");
-	// printf("Program 4: Database of Students\n\n");
+	printf("CS 211, Spring 2023\n");
+	printf("Program 4: Database of Students\n\n");
 
-	// printf("Enter E to start with an empty database, \n");
-	// printf("or F to start with a database that has information on students from a file.\n");
-	// printf("Your choice --> ");
-	// printf("Sorry, that input was invalid. Please try again.\n");
+	printf("Enter E to start with an empty database, \n");
+	printf("or F to start with a database that has information on students from a file.\n");
+	printf("Your choice --> ");
+	scanf("%c", &userInput);
+
+	while(userInput[0] != 'E' || userInput[0] != 'F'){
+		printf("Sorry, that input was invalid. Please try again.\n");
+		printf("Your choice --> ");
+		scanf("%s", userInput);
+	}
+	if (userInput[0] == 'F'){
+		printf("Enter the name of the file you would like to use: ");
+		//importFile();
+	}
 	
-	// printf("Enter the name of the file you would like to use: ");
+
+
 
 	// printf("\nEnter: \tC to create a new student and add them to the database,\n");
 	// printf("\tR to read from the database,\n");
