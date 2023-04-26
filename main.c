@@ -24,14 +24,15 @@ typedef struct {
 	StudentNode* pSeniorList; //insertNameInOrder
 } Database;
 
-StudentNode* createStudent(char* name, char* id, double gpa, int creditHours);
+Student* createStudent(char* name, char* id, double gpa, int creditHours);
+StudentNode* createStudentNode(Student* student);
 void insertNameInOrder(StudentNode**, StudentNode*);
 void insertIDInOrder(StudentNode** pHead, StudentNode* student);
 void insertGPAInOrder(StudentNode**, StudentNode*);
 void insertStudent(Database* db, char* name, char* id, double gpa, int creditHours);
 int deleteStudentFromDB(Database*, char* ID);
-StudentNode* removeAndReturnByID(StudentNode** pHead, char* ID);
-void removeAndDeleteStudentByID(StudentNode** pHead, char* ID);
+void deleteStudentNodeByID(StudentNode** pHead, char* ID);
+Student* findStudentByID(StudentNode* pHead, char* ID);
 
 /// @brief insert a StudentNode into a list in alphabetical order of the student's name
 /// @param pHead pointer to head of list passed by reference
@@ -138,62 +139,47 @@ void insertGPAInOrder(StudentNode** pHead, StudentNode* student){
 /// @param db pointer to database
 /// @param student pointer to StudentNode to insert.  pNext must be initialized to NULL.
 void insertStudent(Database* db, char* name, char* id, double gpa, int creditHours){
-	insertIDInOrder(&(db->pIDList), createStudent(name, id, gpa, creditHours));
+	Student* student = createStudent(name, id, gpa, creditHours);
+
+	insertIDInOrder(&(db->pIDList), createStudentNode(student));
 
 	if (gpa >= 3.5)
-		insertGPAInOrder(&(db->pHonorRollList), createStudent(name, id, gpa, creditHours));
+		insertGPAInOrder(&(db->pHonorRollList), createStudentNode(student));
 	else if (gpa < 2.0)
-		insertGPAInOrder(&(db->pAcademicProbationList), createStudent(name, id, gpa, creditHours));
+		insertGPAInOrder(&(db->pAcademicProbationList), createStudentNode(student));
 	
 	if (creditHours >= 90)
-		insertNameInOrder(&(db->pSeniorList), createStudent(name, id, gpa, creditHours));
+		insertNameInOrder(&(db->pSeniorList), createStudentNode(student));
 	else if (creditHours >= 60)
-		insertNameInOrder(&(db->pJuniorList), createStudent(name, id, gpa, creditHours));
+		insertNameInOrder(&(db->pJuniorList), createStudentNode(student));
 	else if (creditHours >= 30)
-		insertNameInOrder(&(db->pSophomoreList), createStudent(name, id, gpa, creditHours));
+		insertNameInOrder(&(db->pSophomoreList), createStudentNode(student));
 	else
-		insertNameInOrder(&(db->pFreshmanList), createStudent(name, id, gpa, creditHours));
+		insertNameInOrder(&(db->pFreshmanList), createStudentNode(student));
 }
 
-/// @brief This function will remove a StudentNode from a list and will return a pointer to the StudentNode removed
-/// @param pHead passed by reference pointer to head of list to remove node from
-/// @param ID char array of StudentNode ID number to search and remove
-/// @return pointer to StudentNode that was removed from the list
-StudentNode* removeAndReturnByID(StudentNode** pHead, char* ID){
-	StudentNode* curr = (*pHead);
-	StudentNode* prev = NULL;
-
+Student* findStudentByID(StudentNode* pHead, char* ID){
+	StudentNode* curr = pHead;
 	while (curr != NULL){
 		if (strcmp(curr->pStudent->id, ID) == 0){
-			if (prev == NULL)
-				(*pHead) = curr->pNext;
-			else
-				prev->pNext = curr->pNext;
-			return curr;
+			return curr->pStudent;
 		}
-		prev = curr;
 		curr = curr->pNext;
 	}
 	return NULL;
 }
 
-/// @brief This function will remove a StudentNode from a list and will free the node from memory
-/// @param pHead passed by reference pointer to beginning of list to remove node from
-/// @param ID char array of StudentNode ID to remove
-void removeAndDeleteStudentByID(StudentNode** pHead, char* ID){
+void deleteStudentNodeByID(StudentNode** pHead, char* ID){
 	StudentNode* curr = (*pHead);
 	StudentNode* prev = NULL;
+
 	while (curr != NULL){
 		if (strcmp(curr->pStudent->id, ID) == 0){
 			if (prev == NULL)
 				(*pHead) = curr->pNext;
 			else
 				prev->pNext = curr->pNext;
-
-			free(curr->pStudent->id);
-			free(curr->pStudent->name);
-			free(curr->pStudent);
-			free(curr);
+			free (curr);
 			return;
 		}
 		prev = curr;
@@ -206,28 +192,29 @@ void removeAndDeleteStudentByID(StudentNode** pHead, char* ID){
 /// @param ID string of Student ID to delete
 /// @return int return 1 if student was found and deleted, return 0 if student was not found
 int deleteStudentFromDB(Database* db, char* ID){
-	StudentNode* studentToRemove = removeAndReturnByID(&(db->pIDList), ID);
-	if (studentToRemove == NULL)
+	Student* studentToDelete = findStudentByID(db->pIDList, ID);
+	if (studentToDelete == NULL)
 		return 0;
 
-	if (studentToRemove->pStudent->gpa >= 3.5)
-		removeAndDeleteStudentByID(&(db->pHonorRollList), ID);
-	else if (studentToRemove->pStudent->gpa < 2.0)
-		removeAndDeleteStudentByID(&(db->pAcademicProbationList), ID);
-	
-	if (studentToRemove->pStudent->creditHours >= 90)
-		removeAndDeleteStudentByID(&(db->pSeniorList), ID);
-	else if (studentToRemove->pStudent->creditHours >= 60)
-		removeAndDeleteStudentByID(&(db->pJuniorList), ID);
-	else if (studentToRemove->pStudent->creditHours >= 30)
-		removeAndDeleteStudentByID(&(db->pSophomoreList), ID);
-	else
-		removeAndDeleteStudentByID(&(db->pFreshmanList), ID);
+	deleteStudentNodeByID(&(db->pIDList), ID);
 
-	free(studentToRemove->pStudent->id);
-	free(studentToRemove->pStudent->name);
-	free(studentToRemove->pStudent);
-	free(studentToRemove);
+	if (studentToDelete->gpa >= 3.5)
+		deleteStudentNodeByID(&(db->pHonorRollList), ID);
+	else if (studentToDelete->gpa < 2.0)
+		deleteStudentNodeByID(&(db->pAcademicProbationList), ID);
+	
+	if (studentToDelete->creditHours >= 90)
+		deleteStudentNodeByID(&(db->pSeniorList), ID);
+	else if (studentToDelete->creditHours >= 60)
+		deleteStudentNodeByID(&(db->pJuniorList), ID);
+	else if (studentToDelete->creditHours >= 30)
+		deleteStudentNodeByID(&(db->pSophomoreList), ID);
+	else
+		deleteStudentNodeByID(&(db->pFreshmanList), ID);
+
+	free(studentToDelete->id);
+	free(studentToDelete->name);
+	free(studentToDelete);
 	return 1;
 }
 
@@ -277,8 +264,7 @@ void printCreditList(StudentNode* pHead){
 /// @param gpa double to set Student GPA to
 /// @param creditHours int to set Student creditHours to
 /// @return pointer to dynamically allocated StudentNode with pNext intialized to NULL
-StudentNode* createStudent(char* name, char* id, double gpa, int creditHours){
-	StudentNode* node = (StudentNode*)malloc(sizeof(StudentNode));
+Student* createStudent(char* name, char* id, double gpa, int creditHours){
 	Student* student = (Student*)malloc(sizeof(Student));
 
 	student->name = (char*)malloc(sizeof(char) * (strlen(name) + 1));
@@ -288,6 +274,11 @@ StudentNode* createStudent(char* name, char* id, double gpa, int creditHours){
 	student->gpa = gpa;
 	student->creditHours = creditHours;
 
+	return student;
+}
+
+StudentNode* createStudentNode(Student* student){
+	StudentNode* node = (StudentNode*)malloc(sizeof(StudentNode));
 	node->pStudent = student;
 	node->pNext = NULL;
 
@@ -343,12 +334,12 @@ int main() {
 	deleteStudentFromDB(t, "8");
 	deleteStudentFromDB(t, "0");
 
-	insertStudent(t, "krenar", "1", 3.5, 100);
-	insertStudent(t, "fiona", "8", 1.2, 120);
+	// insertStudent(t, "krenar", "1", 3.5, 100);
+	// insertStudent(t, "fiona", "8", 1.2, 120);
 
-	deleteStudentFromDB(t, "1");
-	deleteStudentFromDB(t, "8");
-	deleteStudentFromDB(t, "123");
+	// deleteStudentFromDB(t, "1");
+	// deleteStudentFromDB(t, "8");
+	// deleteStudentFromDB(t, "123");
 
 	printDatabase(t);
 
