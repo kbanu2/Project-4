@@ -30,8 +30,8 @@ void insertIDInOrder(StudentNode** pHead, StudentNode* student);
 void insertGPAInOrder(StudentNode**, StudentNode*);
 void insertStudent(Database* db, char* name, char* id, double gpa, int creditHours);
 int deleteStudentFromDB(Database*, char* ID);
-StudentNode* findAndRemoveStudentID(StudentNode**, char*);
-void removeStudentByAddress(StudentNode** pHead, StudentNode* studentToRemove);
+StudentNode* removeAndReturnByID(StudentNode** pHead, char* ID);
+void removeAndDeleteStudentByID(StudentNode** pHead, char* ID);
 
 /// @brief insert a StudentNode into a list in alphabetical order of the student's name
 /// @param pHead pointer to head of list passed by reference
