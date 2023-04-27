@@ -47,7 +47,7 @@ void insertNameInOrder(StudentNode** pHead, StudentNode* student){
 	StudentNode* curr = *pHead;
 
 	while (curr != NULL){
-		if (strcmp(student->pStudent->name, curr->pStudent->name) < 0){ //Insert before
+		if (strcmp(student->pStudent->name, curr->pStudent->name) <= 0){ //Insert before
 			if (prev == NULL){ //Insert before first node
 				student->pNext = (*pHead);
 				(*pHead) = student;
@@ -80,7 +80,7 @@ void insertIDInOrder(StudentNode** pHead, StudentNode* student){
 	StudentNode* curr = *pHead;
 
 	while (curr != NULL){
-		if (strcmp(student->pStudent->id, curr->pStudent->id) < 0){ //Insert before
+		if (strcmp(student->pStudent->id, curr->pStudent->id) <= 0){ //Insert before
 			if (prev == NULL){ //Insert before first node
 				student->pNext = (*pHead);
 				(*pHead) = student;
@@ -114,7 +114,7 @@ void insertGPAInOrder(StudentNode** pHead, StudentNode* student){
 	StudentNode* curr = *pHead;
 
 	while (curr != NULL){
-		if (student->pStudent->gpa < curr->pStudent->gpa){ //Insert before
+		if (student->pStudent->gpa <= curr->pStudent->gpa){ //Insert before
 			if (prev == NULL){ //Insert before first node
 				student->pNext = (*pHead);
 				(*pHead) = student;
@@ -347,7 +347,9 @@ int loadFile(Database* db, char fileName[81]){
 	}
 
 	char line[1024];
-	char* splitLine, *id, *name;
+	char* splitLine;
+	char* name = (char*)malloc(sizeof(char) * 81);
+	char* id = (char*)malloc(sizeof(char) * 81);
 	double gpa;
 	int creditHours, column;
 	fgets(line, 1024, filePtr); //Remove first line
@@ -374,70 +376,60 @@ int loadFile(Database* db, char fileName[81]){
 		}
 		insertStudent(db, name, id, gpa, creditHours);
 	}
+
+	free(name);
+	free(id);
+	fclose(filePtr);
 	return 1;
 }
 
+void freeDataBase(Database** db){
+	StudentNode* next = NULL;
+	StudentNode* curr = (*db)->pIDList;
+	while (curr != NULL){
+		next = curr->pNext;
+		deleteStudentFromDB(*db, curr->pStudent->id);
+
+		curr = next;
+	}
+
+	free(*db);
+	(*db) = NULL;
+}
+
+void printMainMenu(){
+	printf("\nEnter: \tC to create a new student and add them to the database,\n");
+	printf("\tR to read from the database,\n");
+	printf("\tD to delete a student from the database, or\n");
+	printf("\tX to exit the program.\n");
+}
+
 int main() {
-	Database* t = (Database*)malloc(sizeof(Database));
-	initializeDB(t);
-	char userInput[81];
+	Database* database = (Database*)malloc(sizeof(Database));
+	initializeDB(database);
+	char userInput;
+	char fileName[81];
 
-	loadFile(t, userInput);
+	printf("CS 211, Spring 2023\n");
+	printf("Program 4: Database of Students\n\n");
 
-	// insertStudent(t, "krenar", "1", 3.5, 100);
-	// insertStudent(t, "adam", "100", 1.9, 30);
-	// insertStudent(t, "izzy", "2", 3.5, 70);
-	// insertStudent(t, "fiona", "8", 1.2, 120);
-	// insertStudent(t, "laine", "0", 4.0, 50);
+	printf("Enter E to start with an empty database, \n");
+	printf("or F to start with a database that has information on students from a file.\n");
+	printf("Your choice --> ");
+	scanf("%c", &userInput);
 
-	 displayHeadOfDB(t->pIDList);
+	while(userInput != 'E' && userInput != 'F'){
+		printf("Sorry, that input was invalid. Please try again.\n");
+		printf("Your choice --> ");
+		scanf("%c", &userInput);
+	}
 
-	// printDatabase(t);
-	// printf("\n\n");
-
-	// deleteStudentFromDB(t, "1");
-	// deleteStudentFromDB(t, "100");
-	// deleteStudentFromDB(t, "2");
-	// deleteStudentFromDB(t, "8");
-	// deleteStudentFromDB(t, "0");
-
-	// insertStudent(t, "krenar", "1", 3.5, 100);
-	// insertStudent(t, "fiona", "8", 1.2, 120);
-
-	// deleteStudentFromDB(t, "1");
-	// deleteStudentFromDB(t, "8");
-	// deleteStudentFromDB(t, "123");
-
-	//printDatabase(t);
-
-	// free(t);
-
-	// printf("CS 211, Spring 2023\n");
-	// printf("Program 4: Database of Students\n\n");
-
-	// printf("Enter E to start with an empty database, \n");
-	// printf("or F to start with a database that has information on students from a file.\n");
-	// printf("Your choice --> ");
-	// scanf("%c", userInput);
-
-	// while(userInput[0] != 'E' || userInput[0] != 'F'){
-	// 	printf("Sorry, that input was invalid. Please try again.\n");
-	// 	printf("Your choice --> ");
-	// 	scanf("%s", userInput);
-	// 	break;
-	// }
-	// if (userInput[0] == 'F'){
-	// 	printf("Enter the name of the file you would like to use: ");
-	// 	//importFile();
-	// }
+	if (userInput == 'F' || userInput == 'f'){
+		printf("Enter the name of the file you would like to use: ");
+		scanf("%s", fileName);
+		loadFile(database, fileName);
+	}
 	
-
-
-
-	// printf("\nEnter: \tC to create a new student and add them to the database,\n");
-	// printf("\tR to read from the database,\n");
-	// printf("\tD to delete a student from the database, or\n");
-	// printf("\tX to exit the program.\n");
 	// printf("Your choice --> ");
 	// printf("Invalid option. Try again.\n");
 
