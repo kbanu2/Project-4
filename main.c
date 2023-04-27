@@ -193,8 +193,10 @@ void deleteStudentNodeByID(StudentNode** pHead, char* ID){
 /// @return int return 1 if student was found and deleted, return 0 if student was not found
 int deleteStudentFromDB(Database* db, char* ID){
 	Student* studentToDelete = findStudentByID(db->pIDList, ID);
-	if (studentToDelete == NULL)
+	if (studentToDelete == NULL){
+		printf("Sorry, there is no student in the database with the id %s.", ID);
 		return 0;
+	}
 
 	deleteStudentNodeByID(&(db->pIDList), ID);
 
@@ -308,6 +310,7 @@ void displayHeadOfDB(StudentNode* pHead){
 		pHead = pHead->pNext;
 		i++;
 	}
+	printf("\n");
 }
 
 void displayStudentsInList(StudentNode* pHead){
@@ -324,6 +327,7 @@ void displayStudentsInList(StudentNode* pHead){
 
 		pHead = pHead->pNext;
 	}
+	printf("\n");
 }
 
 int loadFile(Database* db, char fileName[81]){
@@ -412,7 +416,7 @@ void createStudentMenu(Database* db){
 	insertStudent(db, name, id, gpa, creditHours);
 
 	printf("Successfully added the following student to the database!\n");
-	printf("%s\n", name);
+	printf("%s:\n", name);
 	printf("\tID - %s\n", id);
 	printf("\tGPA - %0.2f\n", gpa);
 	printf("\tCredit Hours - %d\n\n", creditHours);
@@ -519,7 +523,7 @@ int main() {
 				readStudentsMenu(database);
 				break;
 			case 'D':
-				printf("Enter the id of the student to remove: ");
+				printf("Enter the id of the student to be removed: ");
 				scanf(" %s", inputString);
 				deleteStudentFromDB(database, inputString);
 				break;
