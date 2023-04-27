@@ -297,29 +297,12 @@ void initializeDB(Database* db){
 	db->pFreshmanList = NULL;
 }
 
-void printDatabase(Database* db){
-	printf("ID List: ");
-	printIDList(db->pIDList);
-	printf("Honor List: ");
-	printGPAList(db->pHonorRollList);
-	printf("Probation List: ");
-	printGPAList(db->pAcademicProbationList);
-	printf("Senior List: ");
-	printNameList(db->pSeniorList);
-	printf("Junior List: ");
-	printNameList(db->pJuniorList);
-	printf("Sophomore List: ");
-	printNameList(db->pSophomoreList);
-	printf("Freshmen List: ");
-	printNameList(db->pFreshmanList);
-}
-
 void displayHeadOfDB(StudentNode* pHead){
 	int i = 0;
 	while (pHead != NULL && i < 10){
-		printf("%s\n", pHead->pStudent->name);
+		printf("%s:\n", pHead->pStudent->name);
 		printf("\tID - %s\n", pHead->pStudent->id);
-		printf("\tGPA - %lf\n", pHead->pStudent->gpa);
+		printf("\tGPA - %0.2f\n", pHead->pStudent->gpa);
 		printf("\tCredit Hours - %d\n", pHead->pStudent->creditHours);
 
 		pHead = pHead->pNext;
@@ -328,10 +311,15 @@ void displayHeadOfDB(StudentNode* pHead){
 }
 
 void displayStudentsInList(StudentNode* pHead){
+	if (pHead == NULL){
+		printf("There are no students matching that criteria.\n\n");
+		return;
+	}
+
 	while (pHead != NULL){
-		printf("%s\n", pHead->pStudent->name);
+		printf("%s:\n", pHead->pStudent->name);
 		printf("\tID - %s\n", pHead->pStudent->id);
-		printf("\tGPA - %lf\n", pHead->pStudent->gpa);
+		printf("\tGPA - %0.2f\n", pHead->pStudent->gpa);
 		printf("\tCredit Hours - %d\n", pHead->pStudent->creditHours);
 
 		pHead = pHead->pNext;
@@ -404,11 +392,100 @@ void printMainMenu(){
 	printf("\tX to exit the program.\n");
 }
 
+void createStudentMenu(Database* db){
+	char name[81];
+	char id[81];
+	double gpa;
+	int creditHours;
+	fflush(stdin);
+
+	printf("Enter the name of the new student: ");
+	fgets(name, 81, stdin);
+	name[strlen(name) - 1] = 0;
+	printf("Enter the ID of the new student: ");
+	scanf("%s", id);
+	printf("Enter the GPA of the new student: ");
+	scanf("%lf", &gpa);
+	printf("Enter the credit hours of the new student: ");
+	scanf("%d", &creditHours);
+
+	insertStudent(db, name, id, gpa, creditHours);
+
+	printf("Successfully added the following student to the database!\n");
+	printf("%s\n", name);
+	printf("\tID - %s\n", id);
+	printf("\tGPA - %0.2f\n", gpa);
+	printf("\tCredit Hours - %d\n\n", creditHours);
+}
+
+void printStudent(Student* student){
+	printf("%s:\n", student->name);
+	printf("\tID - %s\n", student->id);
+	printf("\tGPA - %0.2f\n", student->gpa);
+	printf("\tCredit Hours - %d\n\n", student->creditHours);
+}
+
+void readStudentsMenu(Database* db){
+	int userChoice;
+	char idToFind[81];
+	Student* student;
+	printf("Select one of the following: \n");
+	printf("\t1) Display the head (first 10 rows) of the database\n");
+	printf("\t2) Display students on the honor roll, in order of their GPA\n");
+	printf("\t3) Display students on academic probation, in order of their GPA\n");
+	printf("\t4) Display freshmen students, in order of their name\n");
+	printf("\t5) Display sophomore students, in order of their name\n");
+	printf("\t6) Display junior students, in order of their name\n");
+	printf("\t7) Display senior students, in order of their name\n");
+	printf("\t8) Display the information of a particular student\n");
+	printf("Your choice --> ");
+	scanf(" %d", &userChoice);
+
+	while (1){
+		switch (userChoice){
+			case 1:
+				displayHeadOfDB(db->pIDList);
+				return;
+			case 2:
+				displayStudentsInList(db->pHonorRollList);
+				return;
+			case 3:
+				displayStudentsInList(db->pAcademicProbationList);
+				return;
+			case 4:
+				displayStudentsInList(db->pFreshmanList);
+				return;
+			case 5:
+				displayStudentsInList(db->pSophomoreList);
+				return;
+			case 6:
+				displayStudentsInList(db->pJuniorList);
+				return;
+			case 7:
+				displayStudentsInList(db->pSeniorList);
+				return;
+			case 8:
+				printf("Enter the id of the student to find: ");
+				scanf(" %s", idToFind);
+				student = findStudentByID(db->pIDList, idToFind);
+				if (student == NULL)
+					printf("Sorry, there is no student in the database with the id %s.\n\n", idToFind);
+				else
+					printStudent(student);
+				return;
+			default:
+				printf("Sorry, that input was invalid. Please try again.\n");
+				printf("Your choice --> ");
+				scanf(" %d", &userChoice);
+		}
+	}
+}
+
 int main() {
 	Database* database = (Database*)malloc(sizeof(Database));
 	initializeDB(database);
 	char userInput;
-	char fileName[81];
+	char inputString[81];
 
 	printf("CS 211, Spring 2023\n");
 	printf("Program 4: Database of Students\n\n");
@@ -416,48 +493,48 @@ int main() {
 	printf("Enter E to start with an empty database, \n");
 	printf("or F to start with a database that has information on students from a file.\n");
 	printf("Your choice --> ");
-	scanf("%c", &userInput);
+	scanf(" %c", &userInput);
 
 	while(userInput != 'E' && userInput != 'F'){
 		printf("Sorry, that input was invalid. Please try again.\n");
 		printf("Your choice --> ");
-		scanf("%c", &userInput);
+		scanf(" %c", &userInput);
 	}
 
-	if (userInput == 'F' || userInput == 'f'){
+	if (userInput == 'F'){
 		printf("Enter the name of the file you would like to use: ");
-		scanf("%s", fileName);
-		loadFile(database, fileName);
+		scanf(" %s", inputString);
+		loadFile(database, inputString);
 	}
-	
-	// printf("Your choice --> ");
-	// printf("Invalid option. Try again.\n");
 
-	// printf("Enter the name of the new student: ");
-	// printf("Enter the ID of the new student: ");
-	// printf("Enter the GPA of the new student: ");
-	// printf("Enter the credit hours of the new student: ");
-	// printf("Successfully added the following student to the database!\n");
+	while (userInput != 'X' && userInput != 'x'){
+		printMainMenu();
+		printf("Your choice --> ");
+		scanf(" %c", &userInput);
+		switch (userInput){
+			case 'C':
+				createStudentMenu(database);
+				break;
+			case 'R':
+				readStudentsMenu(database);
+				break;
+			case 'D':
+				printf("Enter the id of the student to remove: ");
+				scanf(" %s", inputString);
+				deleteStudentFromDB(database, inputString);
+				break;
+			case 'X':
+				freeDataBase(&database);
+				break;
+			default:
+				printf("Invalid option. Try again.\n");
+				printf("Your choice --> ");
+				scanf(" %c", &userInput);
+		}
+	}
 
-	// printf("Select one of the following: \n");
-	// printf("\t1) Display the head (first 10 rows) of the database\n");
-	// printf("\t2) Display students on the honor roll, in order of their GPA\n");
-	// printf("\t3) Display students on academic probation, in order of their GPA\n");
-	// printf("\t4) Display freshmen students, in order of their name\n");
-	// printf("\t5) Display sophomore students, in order of their name\n");
-	// printf("\t6) Display junior students, in order of their name\n");
-	// printf("\t7) Display senior students, in order of their name\n");
-	// printf("\t8) Display the information of a particular student\n");
-	// printf("Your choice --> ");
-	// printf("Sorry, that input was invalid. Please try again.\n");
-	
-	// printf("There are no students matching that criteria.\n\n");
-
-	// printf("Enter the id of the student to find: ");
-	// printf("Sorry, there is no student in the database with the id 6ABCDEFGH.\n");
-
-	// printf("Thanks for playing!\n");
-	// printf("Exiting...\n");
+	printf("Thanks for playing!\n");
+	printf("Exiting...\n");
 	
 	return 0;
 }
