@@ -397,7 +397,7 @@ void createStudentMenu(Database* db){
 	char id[81];
 	double gpa;
 	int creditHours;
-	fflush(stdin);
+	fgets(name, 81, stdin); // REMOVE ENDLINE
 
 	printf("Enter the name of the new student: ");
 	fgets(name, 81, stdin);
@@ -507,7 +507,7 @@ int main() {
 		loadFile(database, inputString);
 	}
 
-	while (userInput != 'X' && userInput != 'x'){
+	while (userInput != 'X'){
 		printMainMenu();
 		printf("Your choice --> ");
 		scanf(" %c", &userInput);
@@ -533,7 +533,7 @@ int main() {
 		}
 	}
 
-	printf("Thanks for playing!\n");
+	printf("\nThanks for playing!\n");
 	printf("Exiting...\n");
 	
 	return 0;
