@@ -339,7 +339,42 @@ void displayStudentsInList(StudentNode* pHead){
 }
 
 int loadFile(Database* db, char fileName[81]){
-	
+	FILE* filePtr = fopen("small-list.csv", "r");
+
+	if (filePtr == NULL){
+		printf("Failed to open file %s\n", fileName);
+		return 0;
+	}
+
+	char line[1024];
+	char* splitLine, *id, *name;
+	double gpa;
+	int creditHours, column;
+	fgets(line, 1024, filePtr); //Remove first line
+	while (fgets(line, 1024, filePtr)){
+		splitLine = strtok(line, ",");
+		column = 0;
+		while (splitLine != NULL){
+			switch (column){
+				case 0:
+					strcpy(name, splitLine);
+					break;
+				case 1:
+					strcpy(id, splitLine);
+					break;
+				case 2:
+					sscanf(splitLine, "%lf", &gpa);
+					break;
+				case 3:
+					sscanf(splitLine, "%d", &creditHours);
+					break;
+			}
+			column++;
+			splitLine = strtok(NULL, ", ");
+		}
+		insertStudent(db, name, id, gpa, creditHours);
+	}
+	return 1;
 }
 
 int main() {
@@ -347,13 +382,15 @@ int main() {
 	initializeDB(t);
 	char userInput[81];
 
-	insertStudent(t, "krenar", "1", 3.5, 100);
-	insertStudent(t, "adam", "100", 1.9, 30);
-	insertStudent(t, "izzy", "2", 3.5, 70);
-	insertStudent(t, "fiona", "8", 1.2, 120);
-	insertStudent(t, "laine", "0", 4.0, 50);
+	loadFile(t, userInput);
 
-	displayHeadOfDB(t->pIDList);
+	// insertStudent(t, "krenar", "1", 3.5, 100);
+	// insertStudent(t, "adam", "100", 1.9, 30);
+	// insertStudent(t, "izzy", "2", 3.5, 70);
+	// insertStudent(t, "fiona", "8", 1.2, 120);
+	// insertStudent(t, "laine", "0", 4.0, 50);
+
+	 displayHeadOfDB(t->pIDList);
 
 	// printDatabase(t);
 	// printf("\n\n");
@@ -373,25 +410,26 @@ int main() {
 
 	//printDatabase(t);
 
-	free(t);
+	// free(t);
 
-	printf("CS 211, Spring 2023\n");
-	printf("Program 4: Database of Students\n\n");
+	// printf("CS 211, Spring 2023\n");
+	// printf("Program 4: Database of Students\n\n");
 
-	printf("Enter E to start with an empty database, \n");
-	printf("or F to start with a database that has information on students from a file.\n");
-	printf("Your choice --> ");
-	scanf("%c", &userInput);
+	// printf("Enter E to start with an empty database, \n");
+	// printf("or F to start with a database that has information on students from a file.\n");
+	// printf("Your choice --> ");
+	// scanf("%c", userInput);
 
-	while(userInput[0] != 'E' || userInput[0] != 'F'){
-		printf("Sorry, that input was invalid. Please try again.\n");
-		printf("Your choice --> ");
-		scanf("%s", userInput);
-	}
-	if (userInput[0] == 'F'){
-		printf("Enter the name of the file you would like to use: ");
-		//importFile();
-	}
+	// while(userInput[0] != 'E' || userInput[0] != 'F'){
+	// 	printf("Sorry, that input was invalid. Please try again.\n");
+	// 	printf("Your choice --> ");
+	// 	scanf("%s", userInput);
+	// 	break;
+	// }
+	// if (userInput[0] == 'F'){
+	// 	printf("Enter the name of the file you would like to use: ");
+	// 	//importFile();
+	// }
 	
 
 
